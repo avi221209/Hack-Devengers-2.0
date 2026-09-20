@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fcfaf6;
-  --foreground: #1c1917;
-  --card-bg: #ffffff;
-  --card-border: #f0e6d6;
-  --terracotta: #c2410c;
-  --terracotta-hover: #9a3412;
-  --terracotta-light: #fff7ed;
-  --mustard: #d97706;
-  --mustard-light: #fef3c7;
-  --forest: #15803d;
-  --forest-light: #f0fdf4;
-  --whatsapp: #25d366;
-  --whatsapp-hover: #20ba5a;
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --background: #FCFAF6;
+  --foreground: #1C1917;
+  --card-bg: #FFFFFF;
+  --card-border: #F0E6D6;
+  --terracotta: #C2410C;
+  --terracotta-hover: #9A3412;
+  --terracotta-light: #FFF7ED;
+  --mustard: #D97706;
+  --mustard-light: #FEF3C7;
+  --forest: #15803D;
+  --forest-light: #F0FDF4;
+  --whatsapp: #25D366;
+  --whatsapp-hover: #20BA5A;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: var(--font-heading), system-ui, sans-serif;
 }
 
 /* Large, thumb-friendly tap targets for mobile */
@@ -30,34 +36,75 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom warm card elevation */
+.tap-target:active {
+  transform: scale(0.96);
+}
+
+/* Warm tactile card elevation - Indian Bazaar aesthetic */
 .dukaan-card {
   background-color: #ffffff;
   border: 1px solid var(--card-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px -2px rgba(120, 53, 15, 0.05), 0 2px 6px -1px rgba(120, 53, 15, 0.03);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px -2px rgba(120, 53, 15, 0.06), 0 2px 6px -1px rgba(120, 53, 15, 0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+.dukaan-card:hover {
+  box-shadow: 0 8px 30px -4px rgba(194, 65, 12, 0.1), 0 4px 10px -2px rgba(194, 65, 12, 0.05);
 }
 
 .dukaan-card-elevated {
   background-color: #ffffff;
-  border: 1px solid #f0e6d6;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px -5px rgba(194, 65, 12, 0.08), 0 4px 10px -2px rgba(194, 65, 12, 0.04);
+  border: 1px solid #F0E6D6;
+  border-radius: 24px;
+  box-shadow: 0 12px 36px -6px rgba(194, 65, 12, 0.12), 0 4px 12px -2px rgba(194, 65, 12, 0.06);
 }
 
-/* Indian festive warm border pattern */
-.border-indian-accent {
-  border-top: 4px solid var(--terracotta);
+/* Warm layered bazaar background gradient */
+.bg-bazaar-hero {
+  background: radial-gradient(circle at 50% 0%, #FFF7ED 0%, #FEF3C7 45%, #FCFAF6 100%);
 }
 
-/* Subtle pulse for active badges */
-@keyframes soft-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
+.bg-bazaar-pattern {
+  background-color: #FCFAF6;
+  background-image: radial-gradient(#FDBA74 0.65px, transparent 0.65px), radial-gradient(#FDBA74 0.65px, #FCFAF6 0.65px);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
+  background-opacity: 0.25;
 }
 
-.animate-soft-pulse {
-  animation: soft-pulse 2.5s infinite ease-in-out;
+/* Entrance Animations */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+.animate-slide-up {
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Strong pulse for WhatsApp conversion bar */
+@keyframes whatsapp-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+  }
+}
+
+.animate-whatsapp-pulse {
+  animation: whatsapp-pulse 2s infinite ease-in-out;
+}
+

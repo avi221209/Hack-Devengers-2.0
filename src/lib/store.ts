@@ -7,7 +7,7 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "businesses.json");
 
 // Pre-loaded realistic demo micro-businesses for instant offline testing & demo mode
-const INITIAL_DEMO_BUSINESSES: Business[] = [
+export const INITIAL_DEMO_BUSINESSES: Business[] = [
   {
     id: "demo-sai-krupa-auto",
     slug: "sai-krupa-auto-garage",
@@ -118,14 +118,16 @@ const INITIAL_DEMO_BUSINESSES: Business[] = [
 
 let memoryBusinesses: Business[] = [...INITIAL_DEMO_BUSINESSES];
 
-// Helper to safely read from local JSON file
 function readFromFile(): Business[] {
   try {
     if (fs.existsSync(DATA_FILE)) {
       const data = fs.readFileSync(DATA_FILE, "utf-8");
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        // Merge demo businesses with stored file businesses
+        const demoSlugs = INITIAL_DEMO_BUSINESSES.map((d) => d.slug);
+        const nonDemos = parsed.filter((b: Business) => !demoSlugs.includes(b.slug));
+        return [...INITIAL_DEMO_BUSINESSES, ...nonDemos];
       }
     }
   } catch (err) {
@@ -134,7 +136,6 @@ function readFromFile(): Business[] {
   return memoryBusinesses;
 }
 
-// Helper to safely write to local JSON file
 function writeToFile(businesses: Business[]) {
   try {
     if (!fs.existsSync(DATA_DIR)) {
@@ -146,7 +147,6 @@ function writeToFile(businesses: Business[]) {
   }
 }
 
-// Initialize memory cache safely
 try {
   if (fs.existsSync(DATA_FILE)) {
     memoryBusinesses = readFromFile();
@@ -209,15 +209,19 @@ export async function saveBusiness(business: Business): Promise<Business> {
 }
 
 /**
- * Get business by slug
+ * Get business by slug:
+ * Checks Supabase first, and seamlessly falls back to memory/demo records if not found in Supabase!
  */
 export async function getBusinessBySlug(slug: string): Promise<Business | null> {
+  const targetSlug = slug.toLowerCase().trim();
+
+  // 1. Check Supabase first if configured
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
         .from("businesses")
         .select("*")
-        .eq("slug", slug)
+        .eq("slug", targetSlug)
         .maybeSingle();
 
       if (!error && data) {
@@ -228,9 +232,13 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
     }
   }
 
+  // 2. Fallback to memory & demo records (guarantees sai-krupa-auto-garage, etc. are ALWAYS found!)
   const all = readFromFile();
-  const found = all.find((b) => b.slug.toLowerCase() === slug.toLowerCase());
-  return found || null;
+  const found = all.find((b) => b.slug.toLowerCase() === targetSlug);
+  if (found) return found;
+
+  const demoMatch = INITIAL_DEMO_BUSINESSES.find((b) => b.slug.toLowerCase() === targetSlug);
+  return demoMatch || null;
 }
 
 /**
@@ -239,6 +247,7 @@ export async function getBusinessBySlug(slug: string): Promise<Business | null> 
 export async function getBusinessesByPhone(phone: string): Promise<Business[]> {
   const cleanQueryPhone = phone.replace(/\D/g, "").slice(-10);
 
+  let supabaseResults: Business[] = [];
   if (isSupabaseConfigured && supabase) {
     try {
       const { data, error } = await supabase
@@ -248,7 +257,7 @@ export async function getBusinessesByPhone(phone: string): Promise<Business[]> {
         .order("created_at", { ascending: false });
 
       if (!error && data && data.length > 0) {
-        return data as Business[];
+        supabaseResults = data as Business[];
       }
     } catch (err) {
       console.warn("Supabase phone search error, falling back to local store:", err);
@@ -256,10 +265,17 @@ export async function getBusinessesByPhone(phone: string): Promise<Business[]> {
   }
 
   const all = readFromFile();
-  return all.filter((b) => {
+  const localResults = all.filter((b) => {
     const cleanBPhone = b.whatsapp_number.replace(/\D/g, "").slice(-10);
     return cleanBPhone.includes(cleanQueryPhone) || cleanQueryPhone.includes(cleanBPhone);
   });
+
+  // Combine results without duplicates
+  const map = new Map<string, Business>();
+  for (const item of [...supabaseResults, ...localResults]) {
+    map.set(item.slug, item);
+  }
+  return Array.from(map.values());
 }
 
 /**
