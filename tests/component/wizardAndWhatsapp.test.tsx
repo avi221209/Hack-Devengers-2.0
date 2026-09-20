@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import { WizardSteps } from "@/components/creation/WizardSteps";
 import { translations } from "@/lib/translations";
 
