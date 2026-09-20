@@ -89,24 +89,43 @@ export default function StorefrontPage() {
       setCurrentUrl(window.location.href);
     }
 
+    let isMounted = true;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 5000);
+
     async function fetchStore() {
       if (!slug) return;
       try {
         setLoading(true);
-        const res = await fetch(`/api/store/${slug}`);
+        const res = await fetch(`/api/store/${slug}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (!res.ok) {
           throw new Error("Storefront not found");
         }
         const data = await res.json();
-        setBusiness(data.business);
+        if (isMounted) setBusiness(data.business);
       } catch (err: any) {
-        setError(err.message || "Failed to load storefront");
+        clearTimeout(timeoutId);
+        if (isMounted) {
+          if (err.name === "AbortError") {
+            setError("Storefront lookup timed out. Storefront not found.");
+          } else {
+            setError(err.message || "Failed to load storefront");
+          }
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     fetchStore();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [slug]);
 
   const handleShare = async () => {
