@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fcfaf6;
+  --foreground: #1c1917;
+  --card-bg: #ffffff;
+  --card-border: #f0e6d6;
+  --terracotta: #c2410c;
+  --terracotta-hover: #9a3412;
+  --terracotta-light: #fff7ed;
+  --mustard: #d97706;
+  --mustard-light: #fef3c7;
+  --forest: #15803d;
+  --forest-light: #f0fdf4;
+  --whatsapp: #25d366;
+  --whatsapp-hover: #20ba5a;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Large, thumb-friendly tap targets for mobile */
+.tap-target {
+  min-height: 48px;
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom warm card elevation */
+.dukaan-card {
+  background-color: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px -2px rgba(120, 53, 15, 0.05), 0 2px 6px -1px rgba(120, 53, 15, 0.03);
+}
+
+.dukaan-card-elevated {
+  background-color: #ffffff;
+  border: 1px solid #f0e6d6;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -5px rgba(194, 65, 12, 0.08), 0 4px 10px -2px rgba(194, 65, 12, 0.04);
+}
+
+/* Indian festive warm border pattern */
+.border-indian-accent {
+  border-top: 4px solid var(--terracotta);
+}
+
+/* Subtle pulse for active badges */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2.5s infinite ease-in-out;
+}
